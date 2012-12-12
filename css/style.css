@@ -57,7 +57,7 @@ h1 {
 }
 
 .background {
-  fill: #eeeeee;
+  fill: #e3eded;
   /* fill: none; */
   /* stroke: #d3d3d3; */
   /* stroke-width: 2; */
@@ -98,6 +98,16 @@ h1 {
   transition: opacity 500ms ease-in;
   -webkit-transition: opacity 500ms ease-in;
   -moz-transition: opacity 500ms ease-in;
+}
+
+#legend {
+  position: fixed;
+  top: 150px;
+  right: 0px;
+  width: 100px;
+  height: 300px;
+  z-index: 100000;
+  overflow: visible;
 }
 
 footer {

@@ -47,7 +47,8 @@ SmallMults = () ->
 
   # names will also be used to color the bars
   colorScale = d3.scale.ordinal()
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c"])
+    # .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c"])
+    .range(["#ff7f0e", "#1f77b4", "#2ca02c", "#d62728", "#8c564b", "#9467bd"])
 
   # yPadding is removed to make room for country names
   yScale = d3.scale.linear()
@@ -70,6 +71,7 @@ SmallMults = () ->
       # store our data and set the scale domains
       data = rawData
       setScales()
+      createLegend()
 
       # bind data to svg elements so there will be a svg for
       # each year
@@ -288,6 +290,28 @@ SmallMults = () ->
     # http://api.jquery.com/position/
     pos = $(el).position()
     pos
+
+  createLegend = () ->
+    legend = d3.select("#legend")
+      .append("svg")
+      .attr("width", 100)
+      .attr("height", 300)
+
+    keys = legend.selectAll("g")
+      .data(data[0].values)
+      .enter().append("g")
+      .attr("transform", (d,i) -> "translate(#{0},#{40 * (i + 1)})")
+
+    keys.append("rect")
+      .attr("width", 30)
+      .attr("height", 30)
+      .attr("fill", (d) -> console.log(d.name);colorScale(d.name))
+
+    keys.append("text")
+      .text((d) -> d.name)
+      .attr("text-anchor", "left")
+      .attr("dx", "2.2em")
+      .attr("dy", "1.2em")
 
   return chart
 
