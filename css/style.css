@@ -25,7 +25,6 @@ h1 {
   margin:0;
 }
 
-
 #vis {
   position: relative;
   width: 800px;
@@ -42,37 +41,16 @@ h1 {
   padding-bottom: 45px;
 }
 
-#detail {
-  background-color:rgba(255,255,255,0.5);
-}
-
 .preview {
   position: relative;
   float: left;
-}
-
-.title {
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 600;
-}
-
-.background {
-  fill: #e3eded;
-  /* fill: none; */
-  /* stroke: #d3d3d3; */
-  /* stroke-width: 2; */
-}
-
-.mouse_preview {
-  pointer-events: all;
-  cursor: pointer;
-  fill: none;
 }
 
 #detail {
   position: fixed;
   top: 128px;
   width: 100%;
+  background-color:rgba(255,255,255,0.5);
 }
 
 #detail_panel {
@@ -98,6 +76,24 @@ h1 {
   transition: opacity 500ms ease-in;
   -webkit-transition: opacity 500ms ease-in;
   -moz-transition: opacity 500ms ease-in;
+}
+
+.title {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+}
+
+.background {
+  fill: #e3eded;
+  /* fill: none; */
+  /* stroke: #d3d3d3; */
+  /* stroke-width: 2; */
+}
+
+.mouse_preview {
+  pointer-events: all;
+  cursor: pointer;
+  fill: none;
 }
 
 #legend {

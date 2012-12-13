@@ -15,8 +15,16 @@ addCommas = (number) ->
 roundNumber = (number, decimals) ->
   Math.round(number * Math.pow(10, decimals)) / Math.pow(10, decimals)
 
-formatNumber = (number) ->
-  addCommas(roundNumber(number,0))
+formatNumber = (number, shorten) ->
+  if shorten
+    if number > 1000000
+      addCommas(roundNumber(number / 1000000,1)) + "M"
+    else if number > 1000
+      addCommas(roundNumber(number / 1000,0)) + "K"
+    else
+      addCommas(roundNumber(number,0))
+  else
+    addCommas(roundNumber(number,0))
 
 # ---
 # Using the 'reusable charts' style closure for 
@@ -256,8 +264,9 @@ SmallMults = () ->
   showTooltip = (d) ->
     content = '<p class="main">' + d.name + '</p>'
     content += '<hr class="tooltip-hr">'
-    content += '<span class="name">CO2 Emissons: </span><span class="value">' + formatNumber(d.value) + ' kt</span><br/>'
-    content += '<span class="name">Worldwide Emissions: </span><span class="value">' + formatNumber(d.percent_world * 100) + '%</span><br/>'
+    content += '<span class="name">CO2 Emissons: </span><span class="value">' + formatNumber(d.value, true) + ' kt</span><br/>'
+    content += '<span class="name">CO2 Emissons: </span><span class="value">' + formatNumber(d.value, false) + ' kt</span><br/>'
+    content += '<span class="name">Worldwide Emissions: </span><span class="value">' + formatNumber(d.percent_world * 100, false) + '%</span><br/>'
     tooltip.showTooltip(content,d3.event)
 
   # ---
