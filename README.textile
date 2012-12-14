@@ -1,29 +1,49 @@
-h1. A simple way to get started with data visualizations using d3 and coffeescript
+h1. Small Multiples with Details on Demand
 
 h2. Usage
 
 h3. First Clone the Repository
 
 <pre>
-git clone git@github.com:vlandham/vis.git
-cd vis
+git clone git@github.com:vlandham/co2_small_multiple.git
+cd co2_small_multiple
 </pre>
 
-h3. You might consider creating a new branch for your Vis
+h3. Remove Google Analytics Code
+
+To make things easy on myself, This is the same code that is used to
+power the live demo. As a consequence, my GA code is in the @index.html@ file.
+
+If you could be a nice person and remove or change that in your version,
+I'd appreciate it.
+
+h3. View Demo
+
+Because of how D3 handles importing data, this tutorial should be viewed using a local webserver to serve the pages.
+
+h4. Python webserver
+
+You can start up a local webserver by using python's built-in simple server:
+
+*For Python 2.xx*
 
 <pre>
-git checkout -b interesting_new_bar_chart
+python -m SimpleHTTPServer -p 3000
 </pre>
 
-h3. View built in example
-
-You can start up a local webserver by using python's simple server:
+*For Python 3.xx*
 
 <pre>
-python -m SimpleHTTTPServer -p 3000
+python -m http.server
 </pre>
 
-or @thin@ in ruby
+*This assumes you have Python availible from the command line.*
+
+On Windows, you will need to install Python. "Here is one tutorial for that":http://www.anthonydebarros.com/2011/10/15/setting-up-python-in-windows-7/
+
+h4. Ruby webserver
+
+The @thin@ webserver, a ruby gem, can also be used:
 
 <pre>
 thin start
@@ -45,47 +65,17 @@ h2. Folder Organization
 * @/index.html@
 ** main page for your visualization. Loads coffeescript and javascript files.
 * @/coffee/@
-** coffeescript files. Example @vis.coffee@.
+** coffeescript files. @vis.coffee@.
 * @/data/@
 ** data dump for @.csv@ and @.json@ files and other data files your vis uses.
 * @/js/@
 ** javascript goes here. JS Libraries in @libs@ directory
 * @/css/@
 ** put your stylesheets in here
-* @/img/@
-** put your images in here
-* @/tools/@
-** put your helper scripts / data manipulation tools here
 
-h2. Requirments
+h2. Requirements
 
 To startup the server, you either need @python@, or a bunch of @ruby@ gems (should be simplified in the future).
 
 Run @bundle install@ to get the gems needed. Gems listed in the Gemfile
-
-h2. Contents
-
-h3. Twitter Bootstrap
-
-* 2.2.1
-
-h3. d3.js
-
-* 2.10.3
-
-h3. Raphael
-
-* 2.1.0
-
-h3. coffee-script.js
-
-* 1.4
-
-h3. jQuery
-
-* 1.7.2
-
-h3. Leaflet
-
-* 0.4 beta
 
