@@ -162,17 +162,17 @@ SmallMults = () ->
     # switch the css on which divs are hidden
     toggleHidden(true)
     
-    detail_view = d3.select("#detail_view")
+    detailView = d3.select("#detail_view")
 
     # clear any existing detail view
-    detail_view.selectAll('.main').remove()
+    detailView.selectAll('.main').remove()
 
     # bind the single element to be detailed to the 
     # detail view's group
-    detail_g = detail_view.selectAll('g').data([d]).enter()
+    detailG = detailView.selectAll('g').data([d]).enter()
 
     # create a new group to display the graph in
-    main = detail_g.append("g")
+    main = detailG.append("g")
       .attr("class", "main")
 
     # draw graph just like in the initial creation
