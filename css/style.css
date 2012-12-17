@@ -20,10 +20,15 @@ header {
   text-align: center;
 }
 
-h1 {
+h1,h2 {
   padding:0 0 0 10px;
   margin:0;
 }
+
+h2 {
+  color: #555;
+}
+
 
 #vis {
   position: relative;
