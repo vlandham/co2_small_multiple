@@ -1,32 +1,4 @@
 # ---
-# General helper functions
-# to assist with formatting numbers
-# ---
-addCommas = (number) ->
-  number += ''
-  values = number.split('.')
-  num = values[0]
-  dec = if values.length > 1 then '.' + values[1] else ''
-  rgx = /(\d+)(\d{3})/
-  while rgx.test(num)
-    num = num.replace(rgx, '$1' + ',' + '$2')
-  num + dec
-
-roundNumber = (number, decimals) ->
-  Math.round(number * Math.pow(10, decimals)) / Math.pow(10, decimals)
-
-formatNumber = (number, shorten) ->
-  if shorten
-    if number > 1000000
-      addCommas(roundNumber(number / 1000000,1)) + "M"
-    else if number > 1000
-      addCommas(roundNumber(number / 1000,0)) + "K"
-    else
-      addCommas(roundNumber(number,0))
-  else
-    addCommas(roundNumber(number,0))
-
-# ---
 # Using the 'reusable charts' style closure for 
 # encapsulating the visualization code
 # ---
@@ -55,7 +27,6 @@ SmallMults = () ->
 
   # names will also be used to color the bars
   colorScale = d3.scale.ordinal()
-    # .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c"])
     .range(["#ff7f0e", "#1f77b4", "#2ca02c", "#d62728", "#8c564b", "#9467bd"])
 
   # yPadding is removed to make room for country names
@@ -66,9 +37,6 @@ SmallMults = () ->
   # when displaying it in detail display
   scaleFactor = 4
 
-  # handy dandy tooltip for detail display
-  tooltip = Tooltip("vis-tooltip", 230)
- 
   # ---
   # Main entry point for our visualization.
   # SVG elements for each small chart are created
@@ -101,11 +69,11 @@ SmallMults = () ->
       previews = svgs.append("g")
        
       # draw the graphs for each data element.
-      # This will call 'drawGraph' for each element
+      # This will call 'drawChart' for each element
       # of the data and will pass in the data as well
       # as the associated group element where the 
       # chart is to be drawn
-      previews.each(drawGraph)
+      previews.each(drawChart)
 
       # create a rect overlay that will intercept
       # mouse clicks and show detail view of clicked
@@ -117,9 +85,9 @@ SmallMults = () ->
         .on("click", showDetail)
 
   # ---
-  # Code for drawing a barchart
+  # Code for drawing a single barchart
   # ---
-  drawGraph = (d,i) ->
+  drawChart = (d,i) ->
     # the 'this' element is the group
     # element which the barchart will
     # live in
@@ -134,13 +102,13 @@ SmallMults = () ->
     graph.selectAll(".bar")
       .data((d) -> d.values)
       .enter().append("rect")
-      .attr("x", (d,i) -> xScale(d.name))
+      .attr("x", (d) -> xScale(d.name))
       .attr("y", (d) -> (graphHeight - yScale(d.value) - yPadding))
       .attr("width", xScale.rangeBand())
-      .attr("height", (d,i) ->  yScale(d.value))
+      .attr("height", (d) ->  yScale(d.value))
       .attr("fill", (d) -> colorScale(d.name))
-      .on("mouseover", showTooltip)
-      .on("mouseout", hideTooltip)
+      .on("mouseover", showAnnotation)
+      .on("mouseout", hideAnnotation)
 
     # add the year title
     graph.append("text")
@@ -155,21 +123,34 @@ SmallMults = () ->
   # the detail view.
   # ---
   drawDetails = (d,i) ->
-    # like in 'drawGraph', 'this'
+    # like in 'drawChart', 'this'
     # is the group element to draw
     # the details in
     graph = d3.select(this)
 
-    # add names under the bars
-    graph.selectAll(".name").data(d.values).enter()
+    # add names under bars
+    graph.selectAll(".name")
+      .data(d.values).enter()
       .append("text")
       .attr("class", "name")
       .text((d) -> d.name)
       .attr("text-anchor", "middle")
       .attr("y", graphHeight - yPadding)
       .attr("dy", "1.3em")
-      .attr("x", (d,i) -> xScale(d.name) + xScale.rangeBand() / 2)
+      .attr("x", (d) -> xScale(d.name) + xScale.rangeBand() / 2)
       .attr("font-size", 8)
+
+    # add values above bars
+    graph.selectAll(".amount")
+      .data(d.values).enter()
+      .append("text")
+      .attr("class", "amount")
+      .text((d) -> if d.value == 0 then "No Data" else shortenNumber(d.value))
+      .attr("text-anchor", "middle")
+      .attr("y", (d) -> (graphHeight - yScale(d.value) - yPadding))
+      .attr("dy", (d) -> if yScale(d.value) < 10 then "-0.3em" else "1.1em")
+      .attr("x", (d) -> xScale(d.name) + xScale.rangeBand() / 2)
+      .attr("font-size", 5)
 
   # ---
   # Shows the detail view for a given element
@@ -196,7 +177,7 @@ SmallMults = () ->
 
     # draw graph just like in the initial creation
     # of the small multiples
-    main.each(drawGraph)
+    main.each(drawChart)
 
     # add details specific to the detail view
     main.each(drawDetails)
@@ -233,8 +214,6 @@ SmallMults = () ->
   # This function shrinks the detail view back from whence it came
   # ---
   hideDetail = (d,i) ->
-    # hide the tooltip if present
-    hideTooltip(d,i)
     # see showDetail for... details
     pos = getPosition(i)
     scrollTop = $(window).scrollTop()
@@ -252,28 +231,39 @@ SmallMults = () ->
 
   # ---
   # Toggles hidden css between the previews and detail view divs
-  # if show is true, the detail view is shown.
+  # if show is true, the detail view is shown
   # ---
   toggleHidden = (show) ->
     d3.select("#previews").classed("hidden", show).classed("visible", !show)
     d3.select("#detail").classed("hidden", !show).classed("visible", show)
 
   # ---
-  # Display content in tooltip on mouseover of bars
+  # Add subtitle that indicates what percantage of
+  # world wide emissions the country is at that year
+  # Serves as example of simple additional interactions
+  # in detail view
   # ---
-  showTooltip = (d) ->
-    content = '<p class="main">' + d.name + '</p>'
-    content += '<hr class="tooltip-hr">'
-    content += '<span class="name">CO2 Emissons: </span><span class="value">' + formatNumber(d.value, true) + ' kt</span><br/>'
-    content += '<span class="name">CO2 Emissons: </span><span class="value">' + formatNumber(d.value, false) + ' kt</span><br/>'
-    content += '<span class="name">Worldwide Emissions: </span><span class="value">' + formatNumber(d.percent_world * 100, false) + '%</span><br/>'
-    tooltip.showTooltip(content,d3.event)
+  showAnnotation = (d) ->
+    graph = d3.select("#detail_view .main")
+    graph.selectAll(".subtitle").remove()
+
+    graph.selectAll(".subtitle")
+      .data([d]).enter()
+      .append("text")
+      .text("#{formatNumber(d.percent_world * 100)}% of Worldwide Emissions")
+      .attr("class", "subtitle")
+      .attr("fill", (d) -> colorScale(d.name))
+      .attr("text-anchor", "middle")
+      .attr("dy", "3.8em")
+      .attr("x", (d) -> graphWidth / 2)
+      .attr("font-size", 8)
 
   # ---
-  # Hide tooltip
+  # remove subtitle
   # ---
-  hideTooltip = (d,i) ->
-    tooltip.hideTooltip()
+  hideAnnotation = (d) ->
+    graph = d3.select("#detail_view .main")
+    graph.selectAll(".subtitle").remove()
 
   # ---
   # Updates domains for scales used in bar charts
@@ -314,7 +304,7 @@ SmallMults = () ->
     keys.append("rect")
       .attr("width", 30)
       .attr("height", 30)
-      .attr("fill", (d) -> console.log(d.name);colorScale(d.name))
+      .attr("fill", (d) -> colorScale(d.name))
 
     keys.append("text")
       .text((d) -> d.name)
@@ -323,6 +313,49 @@ SmallMults = () ->
       .attr("dy", "1.2em")
 
   return chart
+
+# ---
+# General helper functions
+# to assist with formatting numbers
+# ---
+
+# ---
+# converts number to string and
+# adds commas
+# ---
+addCommas = (number) ->
+  number += ''
+  values = number.split('.')
+  num = values[0]
+  dec = if values.length > 1 then '.' + values[1] else ''
+  rgx = /(\d+)(\d{3})/
+  while rgx.test(num)
+    num = num.replace(rgx, '$1' + ',' + '$2')
+  num + dec
+
+# ---
+# round to a specific decimal
+# ---
+roundNumber = (number, decimals) ->
+  Math.round(number * Math.pow(10, decimals)) / Math.pow(10, decimals)
+
+# ---
+# add commas and round number
+# ---
+formatNumber = (number) ->
+  addCommas(roundNumber(number,0))
+
+# ---
+# Millions -> M
+# Thousands -> K
+# ---
+shortenNumber = (number) ->
+  if number > 1000000
+    addCommas(roundNumber(number / 1000000,1)) + "M"
+  else if number > 1000
+    addCommas(roundNumber(number / 1000,0)) + "K"
+  else
+    addCommas(roundNumber(number,0))
 
 # ---
 # Given the div, data, and plot
@@ -337,7 +370,6 @@ plotData = (selector, data, plot) ->
 
 # Document is ready. Lets do this.
 $ ->
-
   plot = SmallMults()
   display = (data) ->
     plotData("#vis", data, plot)
